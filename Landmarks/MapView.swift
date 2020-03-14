@@ -17,5 +17,6 @@ struct MapView: UIViewRepresentable {
 struct _MapView_Previews: PreviewProvider {
     static var previews: some View {
         MapView()
+            .colorScheme(.dark)
     }
 }
