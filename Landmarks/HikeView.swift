@@ -1,11 +1,14 @@
-/*
-See LICENSE folder for this sample’s licensing information.
-
-Abstract:
-A view displaying information about a hike, including an elevation graph.
-*/
-
 import SwiftUI
+
+extension AnyTransition {
+    static var moveAndFade: AnyTransition {
+        let insertion = AnyTransition.move(edge: .trailing)
+            .combined(with: .opacity)
+        let removal = AnyTransition.scale
+            .combined(with: .opacity)
+        return .asymmetric(insertion: insertion, removal: removal)
+    }
+}
 
 struct HikeView: View {
     var hike: Hike
@@ -27,7 +30,9 @@ struct HikeView: View {
                 Spacer()
 
                 Button(action: {
-                    self.showDetail.toggle()
+                    withAnimation {
+                        self.showDetail.toggle()
+                    }
                 }) {
                     Image(systemName: "chevron.right.circle")
                         .imageScale(.large)
@@ -39,6 +44,7 @@ struct HikeView: View {
 
             if showDetail {
                 HikeDetail(hike: hike)
+                    .transition(.moveAndFade)
             }
         }
     }
