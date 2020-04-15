@@ -3,6 +3,7 @@ import UIKit
 
 struct PageViewController: UIViewControllerRepresentable {
     var controllers: [UIViewController]
+    @Binding var currentPage: Int
 
     func makeCoordinator() -> Coordinator {
         Coordinator(self)
@@ -18,14 +19,15 @@ struct PageViewController: UIViewControllerRepresentable {
 
     func updateUIViewController(_ pageViewController: UIPageViewController, context: Context) {
         pageViewController.setViewControllers(
-            [controllers[0]],
+            [controllers[currentPage]],
             direction: .forward,
             animated: true
         )
         pageViewController.dataSource = context.coordinator
+        pageViewController.delegate = context.coordinator
     }
     
-    class Coordinator: NSObject, UIPageViewControllerDataSource {
+    class Coordinator: NSObject, UIPageViewControllerDataSource, UIPageViewControllerDelegate {
         var parent: PageViewController
         
         init(_ pageViewController: PageViewController) {
@@ -34,8 +36,7 @@ struct PageViewController: UIViewControllerRepresentable {
         
         func pageViewController(
             _ pageViewController: UIPageViewController,
-            viewControllerBefore viewController: UIViewController) -> UIViewController?
-        {
+            viewControllerBefore viewController: UIViewController) -> UIViewController? {
             guard let index = parent.controllers.firstIndex(of: viewController) else {
                 return nil
             }
@@ -47,8 +48,7 @@ struct PageViewController: UIViewControllerRepresentable {
 
         func pageViewController(
             _ pageViewController: UIPageViewController,
-            viewControllerAfter viewController: UIViewController) -> UIViewController?
-        {
+            viewControllerAfter viewController: UIViewController) -> UIViewController? {
             guard let index = parent.controllers.firstIndex(of: viewController) else {
                 return nil
             }
@@ -56,6 +56,14 @@ struct PageViewController: UIViewControllerRepresentable {
                 return parent.controllers.first
             }
             return parent.controllers[index + 1]
+        }
+
+        func pageViewController(_ pageViewController: UIPageViewController, didFinishAnimating finished: Bool, previousViewControllers: [UIViewController], transitionCompleted completed: Bool) {
+            if completed,
+                let visibleViewController = pageViewController.viewControllers?.first,
+                let index = parent.controllers.firstIndex(of: visibleViewController) {
+                parent.currentPage = index
+            }
         }
     }
 }
